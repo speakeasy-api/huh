@@ -99,6 +99,7 @@ func (i *Input) Suggestions(suggestions []string) *Input {
 	return i
 }
 
+// SetSuggestionCallback sets the suggestion callback function of the input field.
 func (i *Input) SetSuggestionCallback(callback func(inputTextVal string) []string) *Input {
 	i.suggestionCallback = callback
 	return i
