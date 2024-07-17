@@ -53,9 +53,14 @@ func NewInput() *Input {
 	input := textinput.New()
 
 	i := &Input{
-		value:     new(string),
-		textinput: input,
-		validate:  func(string) error { return nil },
+		accessor:    &EmbeddedAccessor[string]{},
+		textinput:   input,
+		validate:    func(string) error { return nil },
+		id:          nextID(),
+		title:       Eval[string]{cache: make(map[uint64]string)},
+		description: Eval[string]{cache: make(map[uint64]string)},
+		placeholder: Eval[string]{cache: make(map[uint64]string)},
+		suggestions: Eval[[]string]{cache: make(map[uint64][]string)},
 	}
 
 	return i
