@@ -22,3 +22,5 @@ go.work
 
 # Debugging
 debug.log
+
+*.iml

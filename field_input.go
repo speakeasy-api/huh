@@ -284,51 +284,49 @@ func (i *Input) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, cmd)
 	i.accessor.Set(i.textinput.Value())
 
+	if ok, hash := i.title.shouldUpdate(); ok {
+		i.title.bindingsHash = hash
+		if !i.title.loadFromCache() {
+			i.title.loading = true
+			cmds = append(cmds, func() tea.Msg {
+				return updateTitleMsg{id: i.id, title: i.title.fn(), hash: hash}
+			})
+		}
+	}
+	if ok, hash := i.description.shouldUpdate(); ok {
+		i.description.bindingsHash = hash
+		if !i.description.loadFromCache() {
+			i.description.loading = true
+			cmds = append(cmds, func() tea.Msg {
+				return updateDescriptionMsg{id: i.id, description: i.description.fn(), hash: hash}
+			})
+		}
+	}
+	if ok, hash := i.placeholder.shouldUpdate(); ok {
+		i.placeholder.bindingsHash = hash
+		if i.placeholder.loadFromCache() {
+			i.textinput.Placeholder = i.placeholder.val
+		} else {
+			i.placeholder.loading = true
+			cmds = append(cmds, func() tea.Msg {
+				return updatePlaceholderMsg{id: i.id, placeholder: i.placeholder.fn(), hash: hash}
+			})
+		}
+	}
+	if ok, hash := i.suggestions.shouldUpdate(); ok {
+		i.suggestions.bindingsHash = hash
+		if i.suggestions.loadFromCache() {
+			i.textinput.ShowSuggestions = len(i.suggestions.val) > 0
+			i.textinput.SetSuggestions(i.suggestions.val)
+		} else {
+			i.suggestions.loading = true
+			cmds = append(cmds, func() tea.Msg {
+				return updateSuggestionsMsg{id: i.id, suggestions: i.suggestions.fn(), hash: hash}
+			})
+		}
+	}
+
 	switch msg := msg.(type) {
-	case updateFieldMsg:
-		var cmds []tea.Cmd
-		if ok, hash := i.title.shouldUpdate(); ok {
-			i.title.bindingsHash = hash
-			if !i.title.loadFromCache() {
-				i.title.loading = true
-				cmds = append(cmds, func() tea.Msg {
-					return updateTitleMsg{id: i.id, title: i.title.fn(), hash: hash}
-				})
-			}
-		}
-		if ok, hash := i.description.shouldUpdate(); ok {
-			i.description.bindingsHash = hash
-			if !i.description.loadFromCache() {
-				i.description.loading = true
-				cmds = append(cmds, func() tea.Msg {
-					return updateDescriptionMsg{id: i.id, description: i.description.fn(), hash: hash}
-				})
-			}
-		}
-		if ok, hash := i.placeholder.shouldUpdate(); ok {
-			i.placeholder.bindingsHash = hash
-			if i.placeholder.loadFromCache() {
-				i.textinput.Placeholder = i.placeholder.val
-			} else {
-				i.placeholder.loading = true
-				cmds = append(cmds, func() tea.Msg {
-					return updatePlaceholderMsg{id: i.id, placeholder: i.placeholder.fn(), hash: hash}
-				})
-			}
-		}
-		if ok, hash := i.suggestions.shouldUpdate(); ok {
-			i.suggestions.bindingsHash = hash
-			if i.suggestions.loadFromCache() {
-				i.textinput.ShowSuggestions = len(i.suggestions.val) > 0
-				i.textinput.SetSuggestions(i.suggestions.val)
-			} else {
-				i.suggestions.loading = true
-				cmds = append(cmds, func() tea.Msg {
-					return updateSuggestionsMsg{id: i.id, suggestions: i.suggestions.fn(), hash: hash}
-				})
-			}
-		}
-		return i, tea.Batch(cmds...)
 	case updateTitleMsg:
 		if i.id == msg.id && i.title.bindingsHash == msg.hash {
 			i.title.update(msg.title)
